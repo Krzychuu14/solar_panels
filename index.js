@@ -1,3 +1,6 @@
+let map;
+let infoWindow;
+
 function initMap() {
         // Wyświetla mape na stronie
     const map = new google.maps.Map(document.getElementById('map'), 
