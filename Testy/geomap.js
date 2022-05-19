@@ -111,15 +111,17 @@ function InitMap() {
         // Sprawdzone
     var getPolygonCoords = function (newShape) {
 
-        coordinates.splice(0, coordinates.length)
-        var len = newShape.getPath().getLength();
+        coordinates.splice(0, coordinates.length)   // Usuwa wszystkie elementy z listy 'coordinates' ???
+        var len = newShape.getPath().getLength();   // Ze zmiennej 'newShape' pobierz sciezke a nastepnie zwroc ilosc elementow tej tablicy
         for (var i=0; i<len; i++) {
+            // Dodajemy wartosc lokalizacji wierzcholka z dokladnoscia do 6 miejsc po przecinku
             coordinates.push(newShape.getPath().getAt(i).toUrlValue(6))
         }
         document.getElementById('info').innerHTML = coordinates
         console.log(coordinates)
         return coordinates;
     };
+
         // Sprawdzone
     google.maps.event.addListener(drawingManager, 'polygoncomplete', function(event) {
         event.getPath().getLength();

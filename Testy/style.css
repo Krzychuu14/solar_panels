@@ -2,23 +2,17 @@
     height: 100%;
 }
 
-
 html, body {
     height: 100%;
     margin: 0px;
     padding: 0px;
 }
 
-#menu {
+#floating-panel {
+    top: 10%;
+    left: 2%;
     position: absolute;
     z-index: 5;
+    background-color: #fff;
     padding: 10px;
-    background-color: #ffffff;
 }
-
-#box-locations {
-    color: #333333;
-    font-size: 12px;
-}
-
-
