@@ -61,13 +61,12 @@ function initMap() {
             console.log(coorner);
             console.log(n, s, e, w);
 
-            // Zakładamy że prostokąt ma wymiary 0.002 i 0.004, NIE WIEM JAK POKAZAĆ MAPE ZA POMOCĄ LEWEGO DOLNEGO ROGU, dlatego muszę obliczyć środek prostokąta
             let x = e - w;
             let y = n - s;
 
             s = s + 0.001;
             w = w + 0.002;
-            // Sprawdzamy prostokąty na poziomie
+
             let howOsX = x / 0.004;
             let howOsY = y / 0.002;
 
@@ -76,7 +75,6 @@ function initMap() {
                     locCenter.push({lat: s + (0.002 * i), lng: w + (0.004 * j)} );
                 }
             }
-            // Mamy już lokalizacje punktów środkowych prostokątów
 
             for (let i = 0; i < locCenter.length; i++) {
                 var marker = new google.maps.Marker({
@@ -91,7 +89,6 @@ function initMap() {
             console.log(locCenter);
     }
 
-        // Sprawdzone
     function clearSelection() {
         if (selectedShape) {
             selectedShape.setEditable(false);
@@ -102,14 +99,14 @@ function initMap() {
     function stopDrawing() {
         drawingManager.setMap(null)
     }
-        // Sprawdzone
+
     function setSelection(shape) {
         clearSelection();
         stopDrawing()
         selectedShape = shape
         shape.setEditable(true)
     }
-        // Sprawdzone
+        
     function deleteSelectedShape() {
         if (selectedShape) {
             selectedShape.setMap(null);
@@ -118,7 +115,7 @@ function initMap() {
             document.getElementById('box-locations').innerHTML = ''
         }
     }
-        // Sprawdzone
+       
     function CenterControl(controlDiv, map) {
             // Set CSS for the control border
         var controlUI = document.createElement('div');
