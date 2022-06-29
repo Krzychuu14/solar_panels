@@ -5,6 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Where is ISS?</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+
+    <style>
+        #issMap { 
+            height: 180px;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -13,14 +23,34 @@
         latitude: <span id="lat"></span> <br />
         longitude: <span id="lon"></span>
     </p>
+    <div id="issMap"></div>
 
     <script>
 
+        const myMap = L.map('issMap').setView([0, 0], 1);
+        const attribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+        const titleUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+        const title = L.tileLayer(titleUrl, { attribution });
+        title.addTo(myMap);
+        
+        var issIcon = L.icon({
+            iconUrl: 'iss.png',
+            iconSize: [30, 20],
+            iconAnchor: [15, 10],   // Połowa z iconSize
+        });
+
+        const marker = L.marker([0, 0], {icon: issIcon} ).addTo(myMap);
+
         const api_url = 'https://api.wheretheiss.at/v1/satellites/25544';
+
         async function getISS() {
             const response = await fetch(api_url);
             const data = await response.json();
             const { latitude, longitude } = data;
+
+            // L.marker([latitude, longitude]).addTo(myMap);
+            marker.setLatLng([ latitude, longitude ]);
 
             document.getElementById('lat').textContent = latitude;
             document.getElementById('lon').textContent = longitude;
