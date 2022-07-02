@@ -50,8 +50,20 @@
             maxZoom: 20,
             subdomains:['mt0','mt1','mt2','mt3']
         });
-        googleSat.addTo(map);
+        // googleSat.addTo(map);
 
+        var baseLayers = {
+            "OpenStreetMap": osm,
+            "Google Street": googleStreets,
+            "Google Satellite": googleSat,
+            "Earth at Night": NASAGIBS_ViirsEarthAtNight2012,   // Tylko odpowiedni zoom
+        };
+
+        var overlays = {
+            "Marker": singleMarker,
+        };
+
+        L.control.layers(baseLayers, overlays).addTo(map);
 
     </script>
 
