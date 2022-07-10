@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Solar Panels Map - SPM </title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            height: 100vh;
+            width: 100%;
+        }
+    </style>
+
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <script>
+
+        // Tworzymy mape z warstwą od satelity google
+        const map = L.map('map').setView([50.028275, 19.9279], 16);
+
+        googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+            maxZoom: 20,
+            subdomains:['mt0','mt1','mt2','mt3']
+        }).addTo(map);
+
+        // Kopiujemy wyniki z googleJSON do zmiennej i wyświetlamy obszar na mapie
+        const lagiewniki = { "type": "FeatureCollection", "features": [ { "type": "Feature", "properties": {}, "geometry": { "type": "Polygon", "coordinates": [ [ [ 19.940882921218872, 50.02827558333476 ], [ 19.936248064041138, 50.02913711386621 ], [ 19.932739734649658, 50.030322554614735 ], [ 19.92797613143921, 50.03032944662656 ], [ 19.92795467376709, 50.02756567056317 ], [ 19.926849603652954, 50.02540140570924 ], [ 19.92549777030945, 50.025091232374606 ], [ 19.92422103881836, 50.02501541192147 ], [ 19.922386407852173, 50.025366942104306 ], [ 19.921892881393433, 50.02323704333497 ], [ 19.92393136024475, 50.023492084734336 ], [ 19.925841093063354, 50.02318189907057 ], [ 19.926141500473022, 50.023368010709184 ], [ 19.92646336555481, 50.023381796727804 ], [ 19.92668867111206, 50.02312675474289 ], [ 19.926559925079346, 50.02249948356001 ], [ 19.926817417144775, 50.02222375737165 ], [ 19.930100440979004, 50.02182395158751 ], [ 19.93316888809204, 50.022347834352246 ], [ 19.93440270423889, 50.024457093990485 ], [ 19.93567943572998, 50.02577361106699 ], [ 19.937310218811035, 50.026552475909014 ], [ 19.940990209579468, 50.02750363885163 ], [ 19.940882921218872, 50.02827558333476 ] ] ] } } ] };
+        // L.geoJSON(lagiewniki, {fillOpacity: 1}).addTo(map);
+
+        // Szukamy punktów krańcowych z "pliku" geoJSON-a
+        const locations = lagiewniki.features[0].geometry.coordinates;  // Tabela 3D
+
+        const lat = [], lon = [];
+        for(let i = 0; i < locations[0].length; i++) {
+            lat.push(locations[0][i][0]);
+            lon.push(locations[0][i][1]);
+        }
+
+        const latMin = Math.min(...lat), latMax = Math.max(...lat);
+        const lonMin = Math.min(...lon), lonMax = Math.max(...lon);
+        console.log(latMin, latMax, lonMin, lonMax);
+        console.log(latMax-latMin, lonMax-lonMin);
+
+        // Dzielenie na mniejsze prostokąty
+        const vertices = [];
+        const deltaX = 0.00269159674, deltaY = 0.00089678631;
+        const x = latMin, y = lonMin, allBoxs = [latMin, 0, lonMin, 0];
+
+        for(let i = 0; i < (latMax-latMin)/deltaX; i++) {
+            allBoxs[1] = i + 1;
+            for(let j = 0; j < (lonMax-lonMin)/deltaY; j++) {
+                allBoxs[3] = j + 1;
+                let vertice = [ [y+(j*deltaY), x+(i*deltaX)], [y+(j*deltaY), x+(i*deltaX)+deltaX], [y+(j*deltaY)+deltaY, x+(i*deltaX)+deltaX], [y+(j*deltaY)+deltaY, x+(i*deltaX)] ]
+                vertices.push(vertice);
+            }
+        }
+
+        console.log(vertices);
+
+        // Usunięcie możliwych błędów podczas analizy obrazu - zmiennienie zewnęcznej części na szare tło
+        var tabele = [];
+
+        bigBox = [ [lonMin, latMin], [lonMin, latMin+deltaX*allBoxs[1]], [lonMin+deltaY*allBoxs[3], latMin+deltaX*allBoxs[1]], [lonMin+deltaY*allBoxs[3], latMin] ];
+        tabele.push(bigBox);
+
+        for (let i = 0; i < locations[0].length; i++) {
+            const x = locations[0][i][0];
+            locations[0][i][0] = locations[0][i][1];
+            locations[0][i][1] = x;
+        }
+        tabele.push(...locations);
+
+        L.polygon(tabele, {color: '#333', fillOpacity: 1}).addTo(map);
+
+        for (let i = 0; i < vertices.length; i++) {     // Może uda się to zamienić na lambde
+           L.polygon(vertices, {color: '#fff', fillOpacity: 0}).addTo(map);
+        }
+
+        // Robimy przechodzenie do innych prostokątów, (dodamy zapewne możliwość robienia od razu zdjęć)
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function verticesPhoto() {
+            for (let i = 0; i < (latMax-latMin)/deltaX; i++) {
+                for (let j = 0; j < (lonMax-lonMin)/deltaY; j++) {
+                    let centerVertice = map.flyTo( [lonMin + deltaY/2 + deltaY*j, latMin + deltaX/2 + deltaX*i], 20);
+                    await sleep(3000);
+                }
+            }
+        }
+        verticesPhoto();
+
+    </script>
+    
+</body>
+</html>
