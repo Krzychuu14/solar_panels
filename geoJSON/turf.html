@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="UTF-8">
+    <title>Turf Leaflet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css" />
+ 	<style> 
+  	#map {
+   	width: 1000px;
+  	 height: 600px; }
+	</style> 
+</head>  
+	<body>
+	 	<script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
+		<script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+		
+		<div id ="map"> </div> 
+	<script>
+	var map = L.map('map', {
+		center: [40.96618, -5.66237],
+		zoom: 15,
+		});
+
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
+
+		var geojson = [{
+		"type": "Feature",
+		"geometry": {
+		"type": "Point",
+		"coordinates": [-5.66237, 40.96618 ]
+		  			},
+		 "properties": {
+		       "name": "Teatro",
+			   "title": "Teatro Liceo"
+		    		  }
+		},{
+		"type": "Feature",
+		 	"geometry": {
+		   		"type": "Point",
+		   		 "coordinates": [ -5.66814 ,40.96187]
+			       },
+		"properties": {
+		 		 "name": "Museo",
+		 		 "title": "Museo de Salamanca"
+				  }
+		},{
+		"type": "Feature",
+		 	"geometry": {
+		   		"type": "Polygon",
+		   		 "coordinates":[[ 
+			    	[-5.6659, 40.9641],
+					[-5.6664, 40.9669],
+					[-5.6616, 40.9660],
+					[-5.6611, 40.9637],
+					[-5.6659, 40.9641]
+				]]
+			       },
+			"properties": {
+		 		"name": "Mi Poligono",
+		 		 "title": "Plaza Mayor"
+				  }
+			}
+			      ];
+
+
+		coords = []; 
+		
+			var puntos = L.geoJSON(geojson, {
+				pointToLayer: function (feature, latlng) {
+						return L.marker(latlng);
+					},	
+				onEachFeature:  function (feature, layer) {
+	            coords.push(feature.geometry.coordinates);
+				}				
+			});
+		
+		map.addLayer(puntos);
+	
+		var geoJsonLayer = L.geoJson().addTo(map);
+
+        // var pt1 = turf.point(coords[0]);
+        // var pt2 = turf.point(coords[1]);
+        // var distance = turf.distance(pt1, pt2, {units: 'meters'});
+        // console.log(distance);
+
+        // dist = Math.round(distance);
+        // document.write('Odległość wynosi:'+dist+'metrów');
+
+        var poly = turf.polygon(coords[2]);
+		var options = {pivot: [-5.6659, 40.9641]};
+		var rotatedPoly = turf.transformRotate(poly, 100, options);
+		L.geoJson(rotatedPoly, {color:"red"}).addTo(map);
+
+        var interseccion = turf.intersect(poly, rotatedPoly);
+        console.log(interseccion);
+        if (interseccion == null) {
+            alert('Polygony nie dotykają się');
+        } else {
+            alert('Polygony się dotykają');
+        }
+
+		</script>
+	</body>
+</html>
